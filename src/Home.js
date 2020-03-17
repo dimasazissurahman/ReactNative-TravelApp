@@ -1,81 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Image } from 'react-native';
 import MapView, { Marker } from 'react-native-maps'
-import styled from 'styled-components';
-import * as Location from 'expo-location';
-import * as Permissions from 'expo-permissions';
-import peopleIcon from '../assets/peopleIcon.png';
+import Maps from './Components/Maps';
+import { SpaceHeader } from './Order';
+import Menu from './Components/Menu';
 
-const Container = styled.View`
-  flex-grow: 1;
-`;
+
 
 function Home() {
-    const [textLatitude, setTextLatitude] = useState(0);
-    const [textLongitude, setTextLongitude] = useState(0);
-    const [location, setLocation] = useState();
-    const [errMsg, setErrMsg] = useState();
-
-    const getLocationAsync = async () => {
-        let status = await Permissions.askAsync(Permissions.LOCATION);
-
-        if (status.status !== 'granted') {
-            setErrMsg('Permission to access location was denied');
-        } else {
-            setErrMsg('Permssion granted')
-
-            let currlocation = await Location.getCurrentPositionAsync();
-
-            setLocation(currlocation);
-            console.log(location);
-            console.log(location.coords);
-            setTextLatitude(location.coords.latitude);
-            console.log(location.coords.latitude);
-            setTextLongitude(location.coords.longitude);
-
-        }
+    const [flagClick, setFlagClick] = useState(true);
+    const [getLoc, setGetLoc] = useState(true);
+    if(getLoc === false){
+        setGetLoc(true);
     }
-    console.log(textLatitude);
-    console.log(textLongitude);
-    console.log(errMsg);
-
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            <Container>
-                {textLatitude ?
-                    <MapView
-                        style={{ flex: 1 }}
-                        initialRegion={{
-                            latitude: textLatitude,
-                            longitude: textLongitude,
-                            latitudeDelta: 0.0043,
-                            longitudeDelta: 0.0034
-                        }}
-                    >
-                        <Marker
-                            coordinate={{
-                                latitude: textLatitude,
-                                longitude: textLongitude
-                            }}
-                        >
-                            <Image style={{height:30, width:30}} resizeMode={"contain"} source={peopleIcon}/>
-                        </Marker>
-                        <Marker
-                        coordinate={{latitude: 37.421995, longitude: -122.083}}
-                        >
-                            <Image style={{height:30, width:30}} resizeMode={"contain"} source={peopleIcon}/>
-                        </Marker>
-                        <Marker
-                        coordinate={{latitude: 37.421989, longitude: -122.085}}
-                        >
-                            <Image style={{height:30, width:30}} resizeMode={"contain"} source={peopleIcon}/>
-                        </Marker>
-                    </MapView>
-                    : <Text>Loading Dulu</Text>}
-                <View onTouchStart={() => getLocationAsync()}>
-                    <Text>Click Here</Text>
+            {flagClick ?
+                <View style={{ flexDirection: "row", width:'100%' }}>
+                    <View style={{width:'40%'}} onTouchStart={() => setFlagClick(false)}>
+                        <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../assets/BurgerBarAndroid.png')} />
+                    </View>
+                    <View style={{width:'40%'}} onTouchStart={()=> setGetLoc(false)} >
+                        <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../assets/locationLogo.png')} />
+                    </View>
                 </View>
-            </Container>
+                :
+                <Menu onTouchStart={() => setFlagClick(true)} />
+            }
+
+            <Maps getLoc={getLoc}/>
         </SafeAreaView>
     );
 }

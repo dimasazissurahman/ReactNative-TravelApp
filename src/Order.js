@@ -1,12 +1,26 @@
-import React from 'react';
-import {View, Text} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import styled from 'styled-components';
+import Menu from './Components/Menu';
 
-function Order() {
+export const SpaceHeader = styled.View`
+    height:20px
+`;
+
+export default function Order() {
+    const [flagClick, setFlagClick] = useState(true);
     return (
-        <View>
-            <Text>Order Transaction</Text>
+        <View style={{ flex: 1, backgroundColor: "white" }}>
+            <SpaceHeader />
+            {flagClick ?
+                <View onTouchStart={() => setFlagClick(false)}>
+                    <Image style={{ position:'absolute',height: 75, width: 75, marginBottom:-50, zIndex:10, top:10, left:10 }} source={require('../assets/BurgerBarAndroid.png')} />
+                </View>
+                :
+                <Menu onTouchStart={() => setFlagClick(true)} />
+            }
+            <Text style={{alignSelf:"center", color: "black" }}>Order Transaction</Text>
         </View>
     );
 }
 
-export default Order;

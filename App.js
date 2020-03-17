@@ -5,8 +5,8 @@ import Home from './src/Home';
 import Order from './src/Order';
 
 const route = createStackNavigator({
-  Main:{screen:Home, navigationOptions:{header:null}},
-  Secondary:{screen:Order, navigationOptions:{header:null}}
+  Home:{screen:Home, navigationOptions:{headerShown:false}},
+  Order:{screen:Order, navigationOptions:{headerShown:false}}
 });
 
 const App = createAppContainer(route);
