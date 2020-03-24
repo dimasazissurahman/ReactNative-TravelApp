@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import { SpaceHeader } from './Menu';
 import { useNavigation } from 'react-navigation-hooks';
+import Axios from 'axios';
 
 const styles = StyleSheet.create({
     containerRegister: {
@@ -102,6 +103,14 @@ export const LoginForm = () => {
             setphoneNumberFlag(false);
         }
     }
+    // const PostAxios = async () => {
+    //     try {
+    //         const data = await Axios.post("localhost:5000/loginuser", )
+            
+    //     } catch (error) {
+            
+    //     }
+    // }
 
     const handlerSubmit = () => {
         if (isPageLogin === true) {
