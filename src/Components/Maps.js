@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Image, ActivityIndicator } from 'react-native';
 import MapView, { Marker } from 'react-native-maps'
 import styled from 'styled-components';
 import * as Location from 'expo-location';
@@ -10,11 +10,12 @@ const Container = styled.View`
   flex-grow: 1;
 `;
 
-function Maps({getLoc, setGetLoc}) {
+function Maps({ getLoc, onPress }) {
     const [textLatitude, setTextLatitude] = useState(0);
     const [textLongitude, setTextLongitude] = useState(0);
     const [location, setLocation] = useState();
     const [errMsg, setErrMsg] = useState();
+    
 
     const getLocationAsync = async () => {
         let status = await Permissions.askAsync(Permissions.LOCATION);
@@ -25,11 +26,11 @@ function Maps({getLoc, setGetLoc}) {
             setErrMsg('Permssion granted')
 
             let currlocation = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
-
+            console.log("jalan");
+            
             setLocation(currlocation);
             setTextLatitude(currlocation.coords.latitude);
             setTextLongitude(currlocation.coords.longitude);
-
         }
     }
     const region = {
@@ -39,13 +40,16 @@ function Maps({getLoc, setGetLoc}) {
         longitudeDelta: 0.0034
     }
     useEffect(() => {
-            getLocationAsync();
+        getLocationAsync();
     }, [getLoc]);
     console.log(location);
 
     console.log(textLatitude);
     console.log(textLongitude);
     console.log(errMsg);
+
+
+
 
     return (
         <Container>
@@ -63,17 +67,20 @@ function Maps({getLoc, setGetLoc}) {
                         <Image style={{ height: 30, width: 30 }} resizeMode={"contain"} source={peopleIcon} />
                     </Marker>
                     <Marker
-                        coordinate={{ latitude: 37.421995, longitude: -122.083 }}
+                        coordinate={{ latitude: -6.1770648, longitude: 106.6462424 }}
                     >
                         <Image style={{ height: 30, width: 30 }} resizeMode={"contain"} source={peopleIcon} />
                     </Marker>
                     <Marker
-                        coordinate={{ latitude: 37.421989, longitude: -122.085 }}
+                        coordinate={{ latitude: -6.1760640, longitude: 106.6465423 }}
+                        onPress={onPress}
                     >
                         <Image style={{ height: 30, width: 30 }} resizeMode={"contain"} source={peopleIcon} />
                     </Marker>
                 </MapView>
-                : <Text>Loading Dulu</Text>}
+                :
+                <ActivityIndicator style={{ flex: 1, alignSelf: "center" }} size={"large"} animating />
+            }
         </Container>
     );
 }
