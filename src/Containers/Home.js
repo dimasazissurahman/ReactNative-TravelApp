@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Image, Button } from 'react-native';
 import Maps from '../Components/Maps';
 import Menu, { styles, FontSize } from '../Components/Menu';
 import { useNavigation } from 'react-navigation-hooks';
+import { AppContext } from '../Components/Provider';
 
 
 
@@ -10,12 +11,19 @@ function Home() {
     const [flagClick, setFlagClick] = useState(true);
     const [getLoc, setGetLoc] = useState(true);
     const [onClickDetail, setOnClickDetail] = useState(true);
+    const { tokenKey } = useContext(AppContext);
 
     const { navigate } = useNavigation();
 
     if (getLoc === false) {
         setGetLoc(true);
     }
+
+    if (onClickDetail === false) {
+        console.log(tokenKey);
+        console.log("Masuk token");
+    }
+
     return (
         <SafeAreaView style={{ flex: 1 }}>
             {flagClick ?
@@ -39,7 +47,7 @@ function Home() {
                             <View style={styles.circle} />
                         </View>
                         <View style={{ width: '60%', justifyContent: "center", marginLeft: 10 }}>
-                            <FontSize>Supriyadi</FontSize>
+                            <FontSize>{tokenKey}</FontSize>
                             <Text style={{ marginTop: 15, color: "#fff", fontSize: 14 }}>English, Indonesia, China</Text>
                         </View>
                     </View>

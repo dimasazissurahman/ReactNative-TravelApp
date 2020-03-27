@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView } from 'react-native';
 import { LoginForm } from '../Components/AllComponents';
+import { AppContext } from '../Components/Provider';
+import Home from './Home';
 
 function LoginRegister() {
+    const { tokenKey } = useContext(AppContext);
+
+
+    useEffect(() => {
+        console.log(tokenKey);
+    }, [tokenKey]);
 
     return (
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: "#00607C" }} behavior={"padding"}>
-            <View style={styles.title}>
-                <Text style={{ fontSize: 25, color: "#FFFFFF" }}>Travel-Guide</Text>
+            <View>
+                <View style={styles.title}>
+                    <Text style={{ fontSize: 25, color: "#FFFFFF" }}>Travel-Guide {tokenKey}</Text>
+                </View>
+                <LoginForm />
             </View>
-            <LoginForm />
         </KeyboardAvoidingView>
     );
 }

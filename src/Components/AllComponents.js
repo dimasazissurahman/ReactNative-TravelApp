@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TextInput } from "react-native";
+import React, { useState, useEffect, useContext } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { SpaceHeader } from "./Menu";
 import { useNavigation } from "react-navigation-hooks";
 import axios from "axios";
+import { AppContext } from "./Provider";
+import { saveItem } from '../Components/DeviceStorage';
+
 const styles = StyleSheet.create({
   containerRegister: {
     backgroundColor: "#66ADC3",
@@ -35,6 +38,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#00607C",
     justifyContent: "center",
     alignItems: "center"
+  },
+  circle: {
+    height: 20,
+    width: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#C9E2EA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkedCircle: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#C9E2EA',
+  },
+  radioContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 10
   }
 });
 
@@ -47,8 +71,14 @@ export const LoginForm = () => {
   const [repasswordFlag, setRepasswordFlag] = useState(false);
   const [phoneNumberValue, setPhoneNumberValue] = useState("");
   const [phoneNumberFlag, setphoneNumberFlag] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+
   const [isPageLogin, setIsPageLogin] = useState(true);
   const [role, setRole] = useState("");
+
+  const { tokenKey, setTokenKey } = useContext(AppContext);
+  const { isLoading, setIsLoading } = useContext(AppContext);
+
   console.log(emailValue, passwordValue, role);
 
   const { navigate } = useNavigation();
@@ -63,9 +93,7 @@ export const LoginForm = () => {
       setEmailFlag(true);
     }
   };
-  const handleRole = text => {
-    setRole(text);
-  };
+
   const handlerPassword = text => {
     if (text === "") {
       setPasswordFlag(false);
@@ -100,27 +128,33 @@ export const LoginForm = () => {
     }
   };
 
-  const handlerSubmit = () => {
+  const handlerSubmit = async () => {
     if (isPageLogin === true) {
       if (emailFlag === true && passwordFlag === true) {
-        console.log(emailValue, passwordValue, role);
-        axios
-          .post("http://192.168.1.9:1010/loginuser", {
+        try {
+          const data = await axios.post("http://192.168.1.10:5000/loginuser", {
             email: emailValue,
             password: passwordValue,
             role: role
-          })
-          .then(function(response) {
-            console.log(response.data.token.iat);
-            if (response.data.token.iat !== "") {
-              navigate("Home");
-            } else {
-              console.log("salah goblog");
-            }
-          })
-          .catch(function(error) {
-            console.log(error);
           });
+          // console.log(data.status);
+          console.log(data);
+          // console.log(data.data.token);
+          // console.log(data.data.token.iat);
+          // if (data.status === 200) {
+          console.log("masuk");
+          saveItem(data.data.token.iat);
+          if(role === "Tourist"){
+            navigate('Home');
+          }else {
+            navigate('HomeTourGuide');
+          }
+          // }
+        } catch (error) {
+          console.log({error: error.response});
+          console.log("Error");
+          alert("Wrong Username/Password");
+        }
       } else {
         console.log("Please fill all field");
       }
@@ -131,12 +165,25 @@ export const LoginForm = () => {
         repasswordFlag === true &&
         phoneNumberFlag === true
       ) {
-        navigate("Home");
+        try {
+          const data = await axios.post("http://192.168.1.10:5000/signupuser", {
+            email: emailValue,
+            name: nameValue,
+            password: passwordValue,
+            phone_number: phoneNumberValue,
+            role: role
+          });
+          console.log(data);
+        } catch (error) {
+          console.log(error);
+        }
+        // navigate("Home");
       } else {
         console.log("Please fill all field");
       }
     }
   };
+
 
   return (
     <View
@@ -149,11 +196,21 @@ export const LoginForm = () => {
           Login
         </Text>
       ) : (
-        <Text style={{ fontSize: 25, color: "#FFFFFF", marginTop: 20 }}>
-          Register
-        </Text>
-      )}
+          <Text style={{ fontSize: 25, color: "#FFFFFF", marginTop: 20 }}>
+            Register
+          </Text>
+        )}
       <View style={{ width: "100%", alignItems: "center", marginTop: 20 }}>
+        {isPageLogin === false &&
+          <TextInput
+            style={styles.textField}
+            onChangeText={text => setNameValue(text)}
+            placeholder={"Name"}
+            placeholderTextColor={"#FFFFFF"}
+            value={nameValue}
+          />
+        }
+
         <TextInput
           style={styles.textField}
           onChangeText={text => handlerEmail(text)}
@@ -169,52 +226,52 @@ export const LoginForm = () => {
           placeholderTextColor={"#FFFFFF"}
           value={passwordValue}
         />
-        <TextInput
-          style={styles.textField}
-          onChangeText={text => handleRole(text)}
-          placeholder={"Role"}
-          placeholderTextColor={"#FFFFFF"}
-          value={role}
-        />
         {isPageLogin === true ? (
           <View></View>
         ) : (
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <TextInput
-              secureTextEntry={true}
-              style={styles.textField}
-              placeholder={"Re-Password"}
-              placeholderTextColor={"#FFFFFF"}
-              onChangeText={text => handleRepassword(text)}
-              value={repasswordValue}
-            />
-            <TextInput
-              keyboardType={"number-pad"}
-              style={styles.textField}
-              placeholder={"Phone Number"}
-              placeholderTextColor={"#FFFFFF"}
-              onChangeText={text => handlePhoneNumber(text)}
-              value={phoneNumberValue}
-            />
-            <TextInput
-              style={styles.textField}
-              onChangeText={text => handleRole(text)}
-              placeholder={"Role"}
-              placeholderTextColor={"#FFFFFF"}
-              value={role}
-            />
+            <View style={{ width: "100%", alignItems: "center" }}>
+              <TextInput
+                secureTextEntry={true}
+                style={styles.textField}
+                placeholder={"Re-Password"}
+                placeholderTextColor={"#FFFFFF"}
+                onChangeText={text => handleRepassword(text)}
+                value={repasswordValue}
+              />
+              <TextInput
+                keyboardType={"number-pad"}
+                style={styles.textField}
+                placeholder={"Phone Number"}
+                placeholderTextColor={"#FFFFFF"}
+                onChangeText={text => handlePhoneNumber(text)}
+                value={phoneNumberValue}
+              />
+            </View>
+          )}
+        <View style={{ flexDirection: "row" }}>
+          <View style={styles.radioContainer}>
+            <TouchableOpacity style={styles.circle} onPress={() => setRole("Tour Guide")}>
+              {role === "Tour Guide" && <View style={styles.checkedCircle} />}
+            </TouchableOpacity>
+            <Text style={{ marginHorizontal: 10 }}>Tour Guide</Text>
           </View>
-        )}
+          <View style={styles.radioContainer}>
+            <TouchableOpacity style={styles.circle} onPress={() => setRole("Tourist")} >
+              {role === "Tourist" && <View style={styles.checkedCircle} />}
+            </TouchableOpacity>
+            <Text style={{ marginHorizontal: 10 }}>Tourist</Text>
+          </View>
+        </View>
 
         {isPageLogin === true ? (
           <View onTouchStart={() => handlerSubmit()} style={styles.buttonLogin}>
             <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign In</Text>
           </View>
         ) : (
-          <View onTouchStart={() => handlerSubmit()} style={styles.buttonLogin}>
-            <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign Up</Text>
-          </View>
-        )}
+            <View onTouchStart={() => handlerSubmit()} style={styles.buttonLogin}>
+              <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign Up</Text>
+            </View>
+          )}
         {isPageLogin === true ? (
           <View style={{ flexDirection: "row", marginTop: 10 }}>
             <Text style={{ color: "#FFFFFF" }}>Don't have Account ?</Text>
@@ -223,13 +280,13 @@ export const LoginForm = () => {
             </View>
           </View>
         ) : (
-          <View style={{ flexDirection: "row", marginTop: 10 }}>
-            <Text style={{ color: "#FFFFFF" }}>Already have Account ?</Text>
-            <View onTouchStart={() => setIsPageLogin(true)}>
-              <Text style={{ color: "#00607C" }}> Sign In</Text>
+            <View style={{ flexDirection: "row", marginTop: 10 }}>
+              <Text style={{ color: "#FFFFFF" }}>Already have Account ?</Text>
+              <View onTouchStart={() => setIsPageLogin(true)}>
+                <Text style={{ color: "#00607C" }}> Sign In</Text>
+              </View>
             </View>
-          </View>
-        )}
+          )}
       </View>
     </View>
   );

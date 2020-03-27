@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import styled from "styled-components";
 import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
 import peopleIcon from "../../assets/peopleIcon.png";
+import { AppContext } from "./Provider";
 
 const Container = styled.View`
   flex-grow: 1;
@@ -22,6 +23,8 @@ function Maps({ getLoc, onPress }) {
   const [textLongitude, setTextLongitude] = useState(0);
   const [location, setLocation] = useState();
   const [errMsg, setErrMsg] = useState();
+
+  const { tokenKey } = useContext(AppContext);
 
   const getLocationAsync = async () => {
     let status = await Permissions.askAsync(Permissions.LOCATION);
@@ -34,6 +37,10 @@ function Maps({ getLoc, onPress }) {
       let currlocation = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High
       });
+      // console.log(currlocation);
+      console.log(tokenKey);
+      
+      
 
       setLocation(currlocation);
       setTextLatitude(currlocation.coords.latitude);
