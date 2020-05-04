@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
-import { SpaceHeader } from "./Menu";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Button, Image, ScrollView, AsyncStorage } from "react-native";
 import { useNavigation } from "react-navigation-hooks";
 import axios from "axios";
 import { AppContext } from "./Provider";
-import { saveItem } from '../Components/DeviceStorage';
+import { saveItem, saveToken, saveRole } from '../Components/DeviceStorage';
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from "expo-permissions";
+import Constants from 'expo-constants';
 
-const styles = StyleSheet.create({
+export const stylesForm = StyleSheet.create({
   containerRegister: {
     backgroundColor: "#66ADC3",
-    height: "100%",
+    height: "80%",
     borderTopStartRadius: 10,
     borderTopEndRadius: 10,
     alignItems: "center"
@@ -17,7 +19,7 @@ const styles = StyleSheet.create({
   containerLogin: {
     backgroundColor: "#66ADC3",
     marginTop: "30%",
-    height: "65%",
+    height: "75%",
     borderTopStartRadius: 10,
     borderTopEndRadius: 10,
     alignItems: "center"
@@ -62,6 +64,8 @@ const styles = StyleSheet.create({
   }
 });
 
+
+
 export const LoginForm = () => {
   const [emailValue, setEmailValue] = useState("");
   const [emailFlag, setEmailFlag] = useState(false);
@@ -72,9 +76,13 @@ export const LoginForm = () => {
   const [phoneNumberValue, setPhoneNumberValue] = useState("");
   const [phoneNumberFlag, setphoneNumberFlag] = useState(false);
   const [nameValue, setNameValue] = useState("");
+  const [ktpNumber, setKtpNumber] = useState();
+  const [region, setRegion] = useState();
 
   const [isPageLogin, setIsPageLogin] = useState(true);
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("Tourist");
+
+  const [imageKtp, setImageKtp] = useState();
 
   const { tokenKey, setTokenKey } = useContext(AppContext);
   const { isLoading, setIsLoading } = useContext(AppContext);
@@ -132,26 +140,27 @@ export const LoginForm = () => {
     if (isPageLogin === true) {
       if (emailFlag === true && passwordFlag === true) {
         try {
-          const data = await axios.post("http://192.168.1.10:5000/loginuser", {
+          const data = await axios.post("http://192.168.1.6:5000/loginuser", {
             email: emailValue,
             password: passwordValue,
             role: role
           });
-          // console.log(data.status);
           console.log(data);
-          // console.log(data.data.token);
-          // console.log(data.data.token.iat);
-          // if (data.status === 200) {
-          console.log("masuk");
-          saveItem(data.data.token.iat);
-          if(role === "Tourist"){
-            navigate('Home');
-          }else {
-            navigate('HomeTourGuide');
+          if (data.status === 200) {
+            console.log("masuk");
+            saveToken(data.data.token.iat);
+            saveRole(role);
+            console.log(data.role);
+
+
+            if (role === "Tourist") {
+              navigate('Tourist');
+            } else {
+              navigate('TourGuide');
+            }
           }
-          // }
         } catch (error) {
-          console.log({error: error.response});
+          console.log({ error: error.response });
           console.log("Error");
           alert("Wrong Username/Password");
         }
@@ -165,129 +174,242 @@ export const LoginForm = () => {
         repasswordFlag === true &&
         phoneNumberFlag === true
       ) {
+        const data = new FormData();
+        console.log(imageKtp.uri + " uri | type " + imageKtp.type);
+        
+        data.append("name", nameValue);
+        data.append("email", emailValue);
+        data.append("password", passwordValue);
+        data.append("phone_number", phoneNumberValue);
+        data.append("role", role);        
+        data.append("img", {
+          uri: imageKtp.uri,
+          type: imageKtp.type
+        });
+
+        // data.append("region", region);
+        // data.append("ktp_number", ktpNumber);
+
         try {
-          const data = await axios.post("http://192.168.1.10:5000/signupuser", {
-            email: emailValue,
-            name: nameValue,
-            password: passwordValue,
-            phone_number: phoneNumberValue,
-            role: role
-          });
+          const data = await axios.post("http://192.168.1.6:5000/signupuser", data);
           console.log(data);
+          if(data){
+            setIsPageLogin(true); 
+          }
         } catch (error) {
           console.log(error);
         }
-        // navigate("Home");
       } else {
         console.log("Please fill all field");
       }
     }
   };
 
+  const getPermissionAccess = async () => {
+    let status = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+    }
+  }
+  
+  const pickImage = async () => {
+    getPermissionAccess();
+
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+      if (result.uri) {
+        setImageKtp(result);
+        console.log(result);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const Auth = async () => {
+    try {
+      const data = await AsyncStorage.getItem("id_token");
+      const dataRole = await AsyncStorage.getItem("user_role");
+      console.log("token =", data);
+      if (data !== null) {
+        if (dataRole === "Tourist") {
+          navigate('Tourist');
+        } else {
+          navigate('TourGuide');
+        }
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    Auth();
+  })
+
+  const handlerChangePage = () => {
+    if (isPageLogin === true) {
+      setEmailValue("");
+      setPasswordValue("");
+      setRepasswordValue("");
+      setNameValue("");
+      setPhoneNumberValue("");
+      setRegion("");
+      setKtpNumber("");
+      setImageKtp();
+      setIsPageLogin(false);
+    } else if (isPageLogin === false) {
+      setEmailValue("");
+      setPasswordValue("");
+      setRepasswordValue("");
+      setNameValue("");
+      setPhoneNumberValue("");
+      setRegion("");
+      setKtpNumber("");
+      setImageKtp();
+      setIsPageLogin(true);
+    }
+  }
+
 
   return (
+
     <View
       style={
-        isPageLogin === true ? styles.containerLogin : styles.containerRegister
+        isPageLogin === true ? stylesForm.containerLogin : stylesForm.containerRegister
       }
     >
-      {isPageLogin === true ? (
-        <Text style={{ fontSize: 25, color: "#FFFFFF", marginTop: 20 }}>
-          Login
-        </Text>
-      ) : (
-          <Text style={{ fontSize: 25, color: "#FFFFFF", marginTop: 20 }}>
-            Register
-          </Text>
-        )}
-      <View style={{ width: "100%", alignItems: "center", marginTop: 20 }}>
-        {isPageLogin === false &&
-          <TextInput
-            style={styles.textField}
-            onChangeText={text => setNameValue(text)}
-            placeholder={"Name"}
-            placeholderTextColor={"#FFFFFF"}
-            value={nameValue}
-          />
-        }
+      <ScrollView style={{ width: "100%" }}>
 
-        <TextInput
-          style={styles.textField}
-          onChangeText={text => handlerEmail(text)}
-          placeholder={"Email"}
-          placeholderTextColor={"#FFFFFF"}
-          value={emailValue}
-        />
-        <TextInput
-          secureTextEntry={true}
-          style={styles.textField}
-          onChangeText={text => handlerPassword(text)}
-          placeholder={"Password"}
-          placeholderTextColor={"#FFFFFF"}
-          value={passwordValue}
-        />
         {isPageLogin === true ? (
-          <View></View>
+          <Text style={{ fontSize: 25, color: "#FFFFFF", marginTop: 20, alignSelf: "center" }}>
+            Login
+          </Text>
         ) : (
+            <Text style={{ fontSize: 25, color: "#FFFFFF", marginTop: 20, alignSelf: "center" }}>
+              Register
+            </Text>
+          )}
+        <View style={{ width: "100%", alignItems: "center", marginTop: 20, alignSelf: "center" }}>
+          {isPageLogin === false &&
+            <TextInput
+              style={stylesForm.textField}
+              onChangeText={text => setNameValue(text)}
+              placeholder={"Full Name"}
+              placeholderTextColor={"#FFFFFF"}
+              value={nameValue}
+            />
+          }
+
+          <TextInput
+            style={stylesForm.textField}
+            onChangeText={text => handlerEmail(text)}
+            placeholder={"Email"}
+            placeholderTextColor={"#FFFFFF"}
+            value={emailValue}
+          />
+          <TextInput
+            secureTextEntry={true}
+            style={stylesForm.textField}
+            onChangeText={text => handlerPassword(text)}
+            placeholder={"Password"}
+            placeholderTextColor={"#FFFFFF"}
+            value={passwordValue}
+          />
+          {isPageLogin === true ? (
+            <View></View>
+          ) : (
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <TextInput
+                  secureTextEntry={true}
+                  style={stylesForm.textField}
+                  placeholder={"Re-Password"}
+                  placeholderTextColor={"#FFFFFF"}
+                  onChangeText={text => handleRepassword(text)}
+                  value={repasswordValue}
+                />
+                <TextInput
+                  keyboardType={"number-pad"}
+                  style={stylesForm.textField}
+                  placeholder={"Phone Number"}
+                  placeholderTextColor={"#FFFFFF"}
+                  onChangeText={text => handlePhoneNumber(text)}
+                  value={phoneNumberValue}
+                />
+              </View>
+            )}
+
+          <View style={{ flexDirection: "row", marginBottom: 20 }}>
+            <View style={stylesForm.radioContainer}>
+              <TouchableOpacity style={stylesForm.circle} onPress={() => setRole("Tour Guide")}>
+                {role === "Tour Guide" && <View style={stylesForm.checkedCircle} />}
+              </TouchableOpacity>
+              <Text style={{ marginHorizontal: 10 }}>Tour Guide</Text>
+            </View>
+            <View style={stylesForm.radioContainer}>
+              <TouchableOpacity style={stylesForm.circle} onPress={() => setRole("Tourist")} >
+                {role === "Tourist" && <View style={stylesForm.checkedCircle} />}
+              </TouchableOpacity>
+              <Text style={{ marginHorizontal: 10 }}>Tourist</Text>
+            </View>
+          </View>
+          {isPageLogin === false &&
+            role === "Tour Guide" &&
             <View style={{ width: "100%", alignItems: "center" }}>
               <TextInput
-                secureTextEntry={true}
-                style={styles.textField}
-                placeholder={"Re-Password"}
+                style={stylesForm.textField}
+                placeholder={"Region"}
                 placeholderTextColor={"#FFFFFF"}
-                onChangeText={text => handleRepassword(text)}
-                value={repasswordValue}
+                onChangeText={text => setRegion(text)}
+                value={region}
               />
               <TextInput
-                keyboardType={"number-pad"}
-                style={styles.textField}
-                placeholder={"Phone Number"}
+                style={stylesForm.textField}
+                placeholder={"KTP Number"}
                 placeholderTextColor={"#FFFFFF"}
-                onChangeText={text => handlePhoneNumber(text)}
-                value={phoneNumberValue}
+                onChangeText={text => setKtpNumber(text)}
+                value={ktpNumber}
               />
+              <View style={stylesForm.textField} onTouchStart={() => pickImage()}>
+                <Text style={{ color: "#FFFFFF", marginTop: 10 }}>Upload KTP Photo</Text>
+              </View>
+              {imageKtp && <Image source={{ uri: imageKtp.uri }} style={{ width: 250, height: 150 }} />}
             </View>
-          )}
-        <View style={{ flexDirection: "row" }}>
-          <View style={styles.radioContainer}>
-            <TouchableOpacity style={styles.circle} onPress={() => setRole("Tour Guide")}>
-              {role === "Tour Guide" && <View style={styles.checkedCircle} />}
-            </TouchableOpacity>
-            <Text style={{ marginHorizontal: 10 }}>Tour Guide</Text>
-          </View>
-          <View style={styles.radioContainer}>
-            <TouchableOpacity style={styles.circle} onPress={() => setRole("Tourist")} >
-              {role === "Tourist" && <View style={styles.checkedCircle} />}
-            </TouchableOpacity>
-            <Text style={{ marginHorizontal: 10 }}>Tourist</Text>
-          </View>
-        </View>
+          }
 
-        {isPageLogin === true ? (
-          <View onTouchStart={() => handlerSubmit()} style={styles.buttonLogin}>
-            <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign In</Text>
-          </View>
-        ) : (
-            <View onTouchStart={() => handlerSubmit()} style={styles.buttonLogin}>
-              <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign Up</Text>
+          {isPageLogin === true ? (
+            <View onTouchStart={() => handlerSubmit()} style={stylesForm.buttonLogin}>
+              <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign In</Text>
             </View>
-          )}
-        {isPageLogin === true ? (
-          <View style={{ flexDirection: "row", marginTop: 10 }}>
-            <Text style={{ color: "#FFFFFF" }}>Don't have Account ?</Text>
-            <View onTouchStart={() => setIsPageLogin(false)}>
-              <Text style={{ color: "#00607C" }}> Sign Up</Text>
-            </View>
-          </View>
-        ) : (
-            <View style={{ flexDirection: "row", marginTop: 10 }}>
-              <Text style={{ color: "#FFFFFF" }}>Already have Account ?</Text>
-              <View onTouchStart={() => setIsPageLogin(true)}>
-                <Text style={{ color: "#00607C" }}> Sign In</Text>
+          ) : (
+              <View onTouchStart={() => handlerSubmit()} style={stylesForm.buttonLogin}>
+                <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign Up</Text>
+              </View>
+            )}
+          {isPageLogin === true ? (
+            <View style={{ flexDirection: "row", marginTop: 10, marginBottom: 50 }}>
+              <Text style={{ color: "#FFFFFF" }}>Don't have Account ?</Text>
+              <View onTouchStart={() => handlerChangePage()}>
+                <Text style={{ color: "#00607C" }}> Register</Text>
               </View>
             </View>
-          )}
-      </View>
+          ) : (
+              <View style={{ flexDirection: "row", marginTop: 10, marginBottom: 50 }}>
+                <Text style={{ color: "#FFFFFF" }}>Already have Account ?</Text>
+                <View onTouchStart={() => handlerChangePage()}>
+                  <Text style={{ color: "#00607C" }}> Login</Text>
+                </View>
+              </View>
+            )}
+        </View>
+      </ScrollView>
     </View>
   );
 };
+

@@ -16,6 +16,8 @@ import { AppContext } from "./Provider";
 
 const Container = styled.View`
   flex-grow: 1;
+  position: absolute;
+  z-index: 999;
 `;
 
 function Maps({ getLoc, onPress }) {
@@ -58,7 +60,7 @@ function Maps({ getLoc, onPress }) {
   }, [getLoc]);
 
   return (
-    <Container>
+    <View style={{flexGrow:1}}>
       {textLatitude ? (
         <MapView style={{ flex: 1 }} region={region}>
           <Marker
@@ -98,7 +100,7 @@ function Maps({ getLoc, onPress }) {
           animating
         />
       )}
-    </Container>
+    </View>
   );
 }
 
