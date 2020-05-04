@@ -5,7 +5,8 @@ const AppContext = React.createContext();
 const AppProvider = ({ children }) => {
     const [tokenKey, setTokenKey] = useState("");
     const [errMsg, setErrMsg] = useState("");
-    const [isLoading, SetIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [role, setRole] = useState("Tourist");
 
     return <AppContext.Provider value={{
         tokenKey: tokenKey,
@@ -13,7 +14,9 @@ const AppProvider = ({ children }) => {
         errMsg: errMsg,
         setErrMsg: setErrMsg,
         isLoading: isLoading,
-        SetIsLoading: SetIsLoading
+        setIsLoading: setIsLoading,
+        role: role,
+        setRole: setRole
     }}>
         {children}
     </AppContext.Provider>
