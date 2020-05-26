@@ -22,10 +22,8 @@ function Profile(props) {
         let emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         if (emailReg.test(text) === false) {
             setEmailValue(text);
-            setEmailFlag(false);
         } else {
             setEmailValue(text);
-            setEmailFlag(true);
         }
     };
     const getPermissionAccess = async () => {

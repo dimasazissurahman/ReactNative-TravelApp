@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { DrawerNavigatorItems } from 'react-navigation-drawer';
-import { deleteToken } from './DeviceStorage';
+import { deleteToken, deleteEmail, deleteData } from './DeviceStorage';
 import { useNavigation } from 'react-navigation-hooks';
 import { stylesForm } from './AllComponents';
 
@@ -10,6 +10,7 @@ export const SideBar = props => {
     const { navigate } = useNavigation();
     const handleLogout = async () => {        
         await deleteToken();
+        await deleteData();
         navigate('Auth');
     }
     return(

@@ -13,7 +13,7 @@ export default function Setting(props) {
             <HeaderComponent title={"Settings"} />
             <View style={styles.container}>
                 <View style={styles.subContainer}>
-                    <View style={styles.buttonContainer}>
+                    <View onTouchStart={() => {}} style={styles.buttonContainer}>
                         <Text style={styles.fontTitle}>Location</Text>
                     </View>
                     <View style={styles.buttonContainer}>

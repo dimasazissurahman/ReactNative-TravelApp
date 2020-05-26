@@ -5,6 +5,7 @@ import Menu, { styles, FontSize } from '../Components/Menu';
 import { useNavigation } from 'react-navigation-hooks';
 import { AppContext } from '../Components/Provider';
 import HeaderComponent from '../Components/Header';
+import photoProfile from '../../assets/IMG_0223.png';
 
 
 
@@ -52,27 +53,17 @@ function Home(props) {
         }
     }
 
+    
+
     useEffect(() => {
         Fetch();
     })
     console.log(onClickDetail);
-    
+
 
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-            {/* {flagClick ?
-                <View style={{ flexDirection: "row", width: '100%' }}>
-                    <View style={{ width: '40%' }} onTouchStart={() => setFlagClick(false)}>
-                        <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../../assets/BurgerBarAndroid.png')} />
-                    </View>
-                    <View style={{ width: '40%' }} onTouchStart={() => setGetLoc(false)} >
-                        <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../../assets/locationLogo.png')} />
-                    </View>
-                </View>
-                :
-                <Menu onTouchStart={() => setFlagClick(true)} />
-            } */}
             <View style={{ flexDirection: "row", width: '100%' }}>
                 <View style={{ width: '40%' }} onTouchStart={props.navigation.openDrawer}>
                     <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../../assets/BurgerBarAndroid.png')} />
@@ -83,12 +74,22 @@ function Home(props) {
             </View>
             <Maps getLoc={getLoc} onPress={() => setOnClickDetail(false)} />
             {onClickDetail === false ?
-                <View onTouchStart={() => setOnClickDetail(true)} style={{ backgroundColor: "#00607C", width: "100%", height: "35%", borderTopStartRadius: 10, borderTopEndRadius: 10, zIndex:10, }}>
-                    <View style={{ flexDirection: "row", margin: 10, borderBottomWidth: 2, paddingBottom: 10 }}>
-                        <View>
-                            <View style={styles.circle} />
+                <View onTouchStart={() => setOnClickDetail(true)} style={{ backgroundColor: "#00607C", width: "100%", height: "35%", borderTopStartRadius: 10, borderTopEndRadius: 10, zIndex: 10, }}>
+                    <View style={{ flexDirection: "row", justifyContent:"center",margin: 10, borderBottomWidth: 2, paddingBottom: 10 }}>
+                        <View style={{
+                            alignSelf: "center",
+                            height: 100,
+                            width: 100,
+                            borderRadius: 100 / 2,
+                            elevation: 10,
+                        }}>
+                            <Image
+                                style={{ height: 100, width: 100, borderRadius: 100 / 2 }}
+                                resizeMode={"cover"}
+                                source={photoProfile}
+                            />
                         </View>
-                        <View style={{ width: '60%', justifyContent: "center", marginLeft: 10 }}>
+                        <View style={{ width: '60%', justifyContent: "center", marginLeft: 20 }}>
                             <FontSize>Supriyono</FontSize>
                             <Text style={{ marginTop: 15, color: "#fff", fontSize: 14 }}>Jakarta</Text>
                         </View>
@@ -98,7 +99,7 @@ function Home(props) {
                             style={{ justifyContent: "center", marginLeft: '10%', width: 120, height: 45, backgroundColor: "#FFFFFF", borderRadius: 10 }}
                             onTouchStart={() => navigate('Order')}
                         >
-                            <Text style={{ color: "#00607C", fontSize: 25, alignSelf: "center" }}>Order</Text>
+                            <Text style={{ color: "#00607C", fontSize: 25, alignSelf: "center" }}>Select</Text>
                         </View>
                         <View style={{ justifyContent: "center", marginLeft: '10%', width: 120, height: 45, backgroundColor: "#00607C", borderWidth: 2, borderColor: "#FFFFFF", borderRadius: 10 }}>
                             <Text style={{ color: "#FFFFFF", fontSize: 25, alignSelf: "center" }}>Detail</Text>

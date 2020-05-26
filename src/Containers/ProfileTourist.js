@@ -17,6 +17,7 @@ function ProfileTourist(props) {
     const [descValue, setDescValue] = useState("");
     const [disableForm, setDisableForm] = useState(false);
     const [photoProfile, setPhotoProfile] = useState();
+    const [saveFlag, setSaveFlag] = useState(false);
 
     const handlerEmail = text => {
         let emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -60,7 +61,7 @@ function ProfileTourist(props) {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor:"#FFFFFF" }}>
+        <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
             <View style={{ flexDirection: "row", width: '100%' }}>
                 <View style={{ width: '40%' }} onTouchStart={props.navigation.openDrawer}>
                     <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../../assets/BurgerBarAndroid.png')} />
@@ -70,46 +71,48 @@ function ProfileTourist(props) {
             <View style={stylesHomeTourGuide.container}>
                 <ScrollView style={{ width: "100%" }}>
                     <SpaceHeader />
-                    <View onTouchStart={() => pickImage()} style={stylesHomeTourGuide.boxPhoto}>
+                    <View style={stylesHomeTourGuide.boxPhoto}>
                         <Image
                             style={{ height: 150, width: 150, borderRadius: 150 / 2 }}
                             resizeMode={"cover"}
                             source={{ uri: photoProfile }}
                         />
                     </View>
-                    <View onTouchStart={() => setDisableForm(true)} style={[stylesForm.buttonLogin, { alignSelf: "center" }]}>
-                        <Text style={{ color: "#fff" }}>Edit Profile</Text>
+                    <View onTouchStart={() => pickImage()} style={[stylesForm.buttonLogin, { alignSelf: "center" }]}>
+                        <Text style={{ color: "#fff" }}>Change Photo</Text>
                     </View>
                     <View style={{ width: "100%", alignItems: "center", marginTop: 20, alignSelf: "center" }}>
                         <TextInput
                             style={[stylesForm.textField, { backgroundColor: "#C9E2EA", borderWidth: 0.5 }]}
                             onChangeText={text => setFNameValue(text)}
                             placeholder={"Full Name"}
-                            placeholderTextColor={disableForm ? "#00607C" : "#999999"}
+                            placeholderTextColor={"#999999"}
                             value={fnameValue}
-                            editable={disableForm}
                         />
                         <TextInput
                             style={[stylesForm.textField, { backgroundColor: "#C9E2EA", borderWidth: 0.5 }]}
                             onChangeText={text => handlerEmail(text)}
                             placeholder={"Email"}
-                            placeholderTextColor={disableForm ? "#00607C" : "#999999"}
+                            placeholderTextColor={"#999999"}
                             value={emailValue}
-                            editable={disableForm}
                         />
                         <TextInput
                             style={[stylesForm.textField, { backgroundColor: "#C9E2EA", borderWidth: 0.5 }]}
                             onChangeText={text => setPhoneValue(text)}
                             keyboardType={"number-pad"}
                             placeholder={"Phone Number"}
-                            placeholderTextColor={disableForm ? "#00607C" : "#999999"}
+                            placeholderTextColor={"#999999"}
                             value={phoneValue}
-                            editable={disableForm}
                         />
                     </View>
-                    <View style={[stylesForm.buttonLogin, { alignSelf: "center", marginBottom: 10 }]}>
+                    <View onTouchStart={() => setSaveFlag(true)} style={[stylesForm.buttonLogin, { alignSelf: "center", marginBottom: 10 }]}>
                         <Text style={{ color: "#fff" }}>Save</Text>
                     </View>
+                    {saveFlag === true &&
+                        <View style={{ width: "80%", alignSelf: "center", paddingVertical: 10, backgroundColor: "#C9E2EA" }}>
+                            <Text style={{ alignSelf: "center", color: "#00607C" }}>Edit Profile Success</Text>
+                        </View>
+                    }
                     <SpaceHeader />
                 </ScrollView>
             </View>

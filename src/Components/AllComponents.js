@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Button, Image, Scr
 import { useNavigation } from "react-navigation-hooks";
 import axios from "axios";
 import { AppContext } from "./Provider";
-import { saveItem, saveToken, saveRole } from '../Components/DeviceStorage';
+import { saveItem, saveToken, saveRole, saveEmail, saveData } from '../Components/DeviceStorage';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from "expo-permissions";
 import Constants from 'expo-constants';
@@ -87,7 +87,7 @@ export const LoginForm = () => {
   const { tokenKey, setTokenKey } = useContext(AppContext);
   const { isLoading, setIsLoading } = useContext(AppContext);
 
-  console.log(emailValue, passwordValue, role);
+
 
   const { navigate } = useNavigation();
 
@@ -136,6 +136,26 @@ export const LoginForm = () => {
     }
   };
 
+  const pickImage = async () => {
+    getPermissionAccess();
+
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (result.uri) {
+        setImageKtp(result);
+        console.log(result);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const handlerSubmit = async () => {
     if (isPageLogin === true) {
       if (emailFlag === true && passwordFlag === true) {
@@ -146,12 +166,15 @@ export const LoginForm = () => {
             role: role
           });
           console.log(data);
+          console.log(data.data.data.name);
+          
+          
+
           if (data.status === 200) {
             console.log("masuk");
             saveToken(data.data.token.iat);
             saveRole(role);
-            console.log(data.role);
-
+            saveData(data.data.data);
 
             if (role === "Tourist") {
               navigate('Tourist');
@@ -174,32 +197,43 @@ export const LoginForm = () => {
         repasswordFlag === true &&
         phoneNumberFlag === true
       ) {
-        const data = new FormData();
-        console.log(imageKtp.uri + " uri | type " + imageKtp.type);
-        
-        data.append("name", nameValue);
-        data.append("email", emailValue);
-        data.append("password", passwordValue);
-        data.append("phone_number", phoneNumberValue);
-        data.append("role", role);        
-        data.append("img", {
-          uri: imageKtp.uri,
-          type: imageKtp.type
-        });
+        let formData = new FormData();
+        console.log(formData);
 
-        // data.append("region", region);
-        // data.append("ktp_number", ktpNumber);
+        formData.append("name", nameValue);
+        formData.append("email", emailValue);
+        formData.append("password", passwordValue);
+        formData.append("phone_number", phoneNumberValue);
+        formData.append("role", role);
+
+        if (role === "Tour Guide") {
+          let localUri = imageKtp.uri;
+          let filename = localUri.split('/').pop();
+
+          let match = /\.(\w+)$/.exec(filename);
+          let type = match ? `image/${match[1]}` : `image`;
+
+          formData.append('img', { uri: localUri, name: filename, type });
+          formData.append("region", region);
+          formData.append("ktp_number", ktpNumber);
+        }
 
         try {
-          const data = await axios.post("http://192.168.1.6:5000/signupuser", data);
-          console.log(data);
-          if(data){
-            setIsPageLogin(true); 
+          let data = await fetch("http://192.168.1.6:5000/signupuser", {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'content-type': 'multipart/form-data',
+            },
+          });
+          if (data.status) {
+            setIsPageLogin(true);
           }
         } catch (error) {
           console.log(error);
         }
       } else {
+        alert("Please fill all field");
         console.log("Please fill all field");
       }
     }
@@ -209,25 +243,6 @@ export const LoginForm = () => {
     let status = await Permissions.askAsync(Permissions.CAMERA_ROLL);
     if (status !== 'granted') {
       alert('Sorry, we need camera roll permissions to make this work!');
-    }
-  }
-  
-  const pickImage = async () => {
-    getPermissionAccess();
-
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-      if (result.uri) {
-        setImageKtp(result);
-        console.log(result);
-      }
-    } catch (error) {
-      console.log(error);
     }
   }
 
@@ -371,6 +386,7 @@ export const LoginForm = () => {
               />
               <TextInput
                 style={stylesForm.textField}
+                keyboardType={"number-pad"}
                 placeholder={"KTP Number"}
                 placeholderTextColor={"#FFFFFF"}
                 onChangeText={text => setKtpNumber(text)}

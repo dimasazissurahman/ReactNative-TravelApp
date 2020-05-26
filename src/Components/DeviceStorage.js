@@ -37,3 +37,31 @@ export const deleteRole = async () => {
         console.log("error deleteRole: " + error);
     }
 }
+
+export const saveData = async (data) => {
+    try {
+        await AsyncStorage.setItem("user_data", JSON.stringify(data));
+        console.log("user data berhasil di store");
+    } catch (error) {
+        console.log("error saveData " + error);
+    }
+}
+
+export const getData = async () => {
+    try {
+        const data = await AsyncStorage.getItem("user_data");
+        console.log("data berhasil di get");
+        return data;
+    } catch (error) {
+        console.log("data error di get" + error);
+    }
+}
+
+export const deleteData = async () => {
+    try {
+        await AsyncStorage.removeItem("user_data");
+        console.log("berhasil hapus data");
+    } catch (error) {
+        console.log("error deleteData: " + error);
+    }
+}

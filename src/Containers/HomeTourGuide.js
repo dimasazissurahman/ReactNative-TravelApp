@@ -5,11 +5,17 @@ import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
 import HeaderComponent from '../Components/Header';
 import photoProfile from '../../assets/IMG_0223.png';
+import { getData } from '../Components/DeviceStorage';
+import Axios from 'axios';
+import { stylesForm } from '../Components/AllComponents';
 
 export default function HomeTourGuide(props) {
     const [flagActive, setFlagActive] = useState(false);
     const [textLatitude, setTextLatitude] = useState(0);
     const [textLongitude, setTextLongitude] = useState(0);
+    const [data, setData] = useState();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
 
     const getLocationAsync = async () => {
         let status = await Permissions.askAsync(Permissions.LOCATION);
@@ -29,16 +35,40 @@ export default function HomeTourGuide(props) {
             setFlagActive(true);
         }
     };
+    const getUserData = async () => {
+        const data = await getData();
+        let objData = JSON.parse(data);
+        setData(objData);
+        console.log(objData);
+        console.log(objData.name);
+        setName(objData.name);
+        setEmail(objData.email);
+
+    }
+
 
     useEffect(() => {
         getLocationAsync();
-        console.log("masuk nih getLocation");
+        if (data) {
+            (async () => {
+                try {
+                    const data = await Axios.post("http://192.168.1.6:5000/location", {
+                        long: "106.6465428",
+                        lat: "-6.1760408",
+                        email: email
+                    });
+                    console.log(data);
+                } catch (error) {
+                    console.log(error);
+                }
+            })();
+        }
     }, [textLongitude, textLongitude]);
 
     useEffect(() => {
+        getUserData();
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 
-        console.log("jalan");
         return () => {
             backHandler.remove();
         }
@@ -50,22 +80,17 @@ export default function HomeTourGuide(props) {
         return true;
     }
 
-    //ini longitut latitut tourguide
-    console.log(textLatitude);
-    console.log(textLongitude);
+    const handleFlagActive = () => {
+        if (flagActive === true) {
+            setFlagActive(false);
+        } else {
+            setFlagActive(true);
+        }
+    }
 
 
     return (
-        <View style={{ flex: 1, backgroundColor: "white" }}>
-            {/* {flagClick ?
-                <View style={{ flexDirection: "row", width: '100%' }}>
-                    <View style={{ width: '40%' }} onTouchStart={() => setFlagClick(false)}>
-                        <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../../assets/BurgerBarAndroid.png')} />
-                    </View>
-                </View>
-                :
-                <Menu onTouchStart={() => setFlagClick(true)} />
-            } */}
+        <View style={{ flex: 1, backgroundColor: "#00607C" }}>
             <View style={{ flexDirection: "row", width: '100%' }}>
                 <View style={{ width: '40%' }} onTouchStart={props.navigation.openDrawer}>
                     <Image style={{ position: 'absolute', height: 75, width: 75, marginBottom: -50, zIndex: 10, top: 30, left: 10 }} source={require('../../assets/BurgerBarAndroid.png')} />
@@ -81,14 +106,26 @@ export default function HomeTourGuide(props) {
                             source={photoProfile}
                         />
                     </View>
-                    <Text style={stylesHomeTourGuide.nameText}>Supriyono</Text>
+                    <Text style={stylesHomeTourGuide.nameText}>{name}</Text>
                 </View>
                 <View style={stylesHomeTourGuide.col_2}>
                     <View style={stylesHomeTourGuide.boxDesc}>
-                        <Text>Description</Text>
+                        <Text style={{ marginBottom: 20, paddingTop: 20 }}>Description</Text>
+                        <View style={{ justifyContent: "flex-start", width: "90%", paddingBottom: 20 }}>
+                            <Text>Paket Kota Tua Rp50.000</Text>
+                            <Text>Paket Monas Rp85.000</Text>
+                            <Text>Paket Pulau Seribu Rp255.000 3D2N</Text>
+                        </View>
                     </View>
                     <View style={stylesHomeTourGuide.boxStatus}>
-                        <Text style={stylesHomeTourGuide.nameText}>Status: {flagActive === false ? "Non-Active": "Active"} </Text>
+                        {/* <Text style={stylesHomeTourGuide.nameText}>Status: {flagActive === false ? "Non-Active" : "Active"} </Text> */}
+                        <View onTouchStart={() => handleFlagActive()} style={[stylesForm.buttonLogin, { marginTop: -10, alignSelf: "center", marginBottom: 10 }]}>
+                            {flagActive === true ?
+                                <Text style={{ color: "#fff" }}>GPS ON</Text>
+                                :
+                                <Text style={{ color: "#fff" }}>GPS OFF</Text>
+                            }
+                        </View>
                     </View>
                 </View>
             </View>
@@ -99,6 +136,7 @@ export const stylesHomeTourGuide = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
+        backgroundColor: "#FFFFFF",
         alignItems: "center",
         borderWidth: 1,
         width: "95%",
@@ -133,7 +171,6 @@ export const stylesHomeTourGuide = StyleSheet.create({
     boxDesc: {
         marginTop: 10,
         width: "95%",
-        height: "70%",
         backgroundColor: "#FFF",
         alignItems: "center",
         borderWidth: 1,
