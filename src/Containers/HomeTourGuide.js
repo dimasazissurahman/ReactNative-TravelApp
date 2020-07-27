@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, BackHandler } from 'react-native';
+import { View, Text, Image, StyleSheet, BackHandler, ToastAndroid, TouchableOpacity } from 'react-native';
 import Menu from '../Components/Menu';
 import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
@@ -16,6 +16,8 @@ export default function HomeTourGuide(props) {
     const [data, setData] = useState();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [descValue, setDescValue] = useState("");
+    const [photoProfile, setPhotoProfile] = useState();
 
     const getLocationAsync = async () => {
         let status = await Permissions.askAsync(Permissions.LOCATION);
@@ -37,13 +39,13 @@ export default function HomeTourGuide(props) {
     };
     const getUserData = async () => {
         const data = await getData();
-        let objData = JSON.parse(data);
-        setData(objData);
-        console.log(objData);
-        console.log(objData.name);
-        setName(objData.name);
-        setEmail(objData.email);
 
+        let img_profile = `http://192.168.1.2:5000/${data.img_profile}`;
+        setData(data);
+        setName(data.name);
+        setEmail(data.email);
+        setDescValue(data.description);
+        setPhotoProfile(img_profile);
     }
 
 
@@ -52,7 +54,7 @@ export default function HomeTourGuide(props) {
         if (data) {
             (async () => {
                 try {
-                    const data = await Axios.post("http://192.168.1.6:5000/location", {
+                    const data = await Axios.post("http://192.168.1.2:5000/location", {
                         long: "106.6465428",
                         lat: "-6.1760408",
                         email: email
@@ -103,7 +105,7 @@ export default function HomeTourGuide(props) {
                         <Image
                             style={{ height: 150, width: 150, borderRadius: 150 / 2 }}
                             resizeMode={"cover"}
-                            source={photoProfile}
+                            source={{ uri: photoProfile }}
                         />
                     </View>
                     <Text style={stylesHomeTourGuide.nameText}>{name}</Text>
@@ -112,20 +114,20 @@ export default function HomeTourGuide(props) {
                     <View style={stylesHomeTourGuide.boxDesc}>
                         <Text style={{ marginBottom: 20, paddingTop: 20 }}>Description</Text>
                         <View style={{ justifyContent: "flex-start", width: "90%", paddingBottom: 20 }}>
-                            <Text>Paket Kota Tua Rp50.000</Text>
-                            <Text>Paket Monas Rp85.000</Text>
-                            <Text>Paket Pulau Seribu Rp255.000 3D2N</Text>
+                            <Text>{descValue}</Text>
                         </View>
                     </View>
                     <View style={stylesHomeTourGuide.boxStatus}>
                         {/* <Text style={stylesHomeTourGuide.nameText}>Status: {flagActive === false ? "Non-Active" : "Active"} </Text> */}
-                        <View onTouchStart={() => handleFlagActive()} style={[stylesForm.buttonLogin, { marginTop: -10, alignSelf: "center", marginBottom: 10 }]}>
-                            {flagActive === true ?
-                                <Text style={{ color: "#fff" }}>GPS ON</Text>
-                                :
-                                <Text style={{ color: "#fff" }}>GPS OFF</Text>
-                            }
-                        </View>
+                        <TouchableOpacity onPress={() => handleFlagActive()}>
+                            <View style={[stylesForm.buttonLogin, { marginTop: -10, alignSelf: "center", marginBottom: 10 }]}>
+                                {flagActive === true ?
+                                    <Text style={{ color: "#fff" }}>GPS ON</Text>
+                                    :
+                                    <Text style={{ color: "#fff" }}>GPS OFF</Text>
+                                }
+                            </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>

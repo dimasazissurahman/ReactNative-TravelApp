@@ -50,8 +50,9 @@ export const saveData = async (data) => {
 export const getData = async () => {
     try {
         const data = await AsyncStorage.getItem("user_data");
+        let objData = JSON.parse(data);
         console.log("data berhasil di get");
-        return data;
+        return objData;
     } catch (error) {
         console.log("data error di get" + error);
     }

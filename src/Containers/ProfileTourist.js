@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TextInput, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, TextInput, ScrollView, AsyncStorage, Alert, ToastAndroid, TouchableOpacity } from 'react-native';
 import Menu, { SpaceHeader } from '../Components/Menu';
 import HeaderComponent from '../Components/Header';
 import { stylesHomeTourGuide } from './HomeTourGuide';
@@ -7,10 +7,12 @@ import photoProfile from '../../assets/IMG_0223.png';
 import { stylesForm } from '../Components/AllComponents';
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from "expo-permissions";
+import { getData, deleteData, saveData } from '../Components/DeviceStorage';
+import Axios from "axios";
 
 
 function ProfileTourist(props) {
-    const [flagClick, setFlagClick] = useState(true);
+    // const [flagStatus, setFlagStatus] = useState(true);
     const [fnameValue, setFNameValue] = useState("");
     const [emailValue, setEmailValue] = useState("");
     const [phoneValue, setPhoneValue] = useState("");
@@ -18,6 +20,9 @@ function ProfileTourist(props) {
     const [disableForm, setDisableForm] = useState(false);
     const [photoProfile, setPhotoProfile] = useState();
     const [saveFlag, setSaveFlag] = useState(false);
+    const [role, setRole] = useState();
+    const [userId, setUserId] = useState();
+
 
     const handlerEmail = text => {
         let emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -35,6 +40,26 @@ function ProfileTourist(props) {
             alert('Sorry, we need camera roll permissions to make this work!');
         }
     }
+    const Fetch = async () => {
+        const data = await getData();
+        console.log(data);
+
+        // setUserData(data);
+        if (data) {
+            let img_profile = `http://192.168.1.2:5000/${data.img_profile}`;
+            setFNameValue(data.name);
+            setEmailValue(data.email);
+            setPhoneValue(data.phone_number);
+            setDescValue(data.description);
+            setPhotoProfile(img_profile);
+            setUserId(data.id);
+            setRole(data.role);
+        }
+    }
+    useEffect(() => {
+        setSaveFlag(false);
+        Fetch();
+    }, []);
 
     const pickImage = async () => {
         getPermissionAccess();
@@ -60,6 +85,46 @@ function ProfileTourist(props) {
         }
     }
 
+    const updateProfile = async () => {
+        let formData = new FormData();
+        let localUri = photoProfile;
+        console.log(localUri);
+
+        let filename = localUri.split('/').pop();
+
+        let match = /\.(\w+)$/.exec(filename);
+        let type = match ? `image/${match[1]}` : `image`;
+
+
+        formData.append("id", userId);
+        formData.append("name", fnameValue);
+        formData.append("email", emailValue);
+        formData.append("phone_number", phoneValue);
+        formData.append("role", role);
+
+        formData.append('img_profile', { uri: localUri, name: filename, type });
+
+
+        try {
+            let data = await Axios.post("http://192.168.1.2:5000/profile", formData);
+            console.log(data);
+
+
+            if (data.status === 200) {
+                await deleteData();
+                console.log(data.data[0]);
+                saveData(data.data[0]);
+                Fetch();
+                setSaveFlag(true);
+                ToastAndroid.show('Success Update', ToastAndroid.SHORT);
+            }
+        } catch (error) {
+            console.log("error");
+
+            console.log(error);
+        }
+    }
+
     return (
         <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
             <View style={{ flexDirection: "row", width: '100%' }}>
@@ -78,9 +143,11 @@ function ProfileTourist(props) {
                             source={{ uri: photoProfile }}
                         />
                     </View>
-                    <View onTouchStart={() => pickImage()} style={[stylesForm.buttonLogin, { alignSelf: "center" }]}>
-                        <Text style={{ color: "#fff" }}>Change Photo</Text>
-                    </View>
+                    <TouchableOpacity onPress={() => pickImage()}>
+                        <View style={[stylesForm.buttonLogin, { alignSelf: "center" }]}>
+                            <Text style={{ color: "#fff" }}>Change Photo</Text>
+                        </View>
+                    </TouchableOpacity>
                     <View style={{ width: "100%", alignItems: "center", marginTop: 20, alignSelf: "center" }}>
                         <TextInput
                             style={[stylesForm.textField, { backgroundColor: "#C9E2EA", borderWidth: 0.5 }]}
@@ -105,9 +172,11 @@ function ProfileTourist(props) {
                             value={phoneValue}
                         />
                     </View>
-                    <View onTouchStart={() => setSaveFlag(true)} style={[stylesForm.buttonLogin, { alignSelf: "center", marginBottom: 10 }]}>
-                        <Text style={{ color: "#fff" }}>Save</Text>
-                    </View>
+                    <TouchableOpacity onPress={() => updateProfile()}>
+                        <View style={[stylesForm.buttonLogin, { alignSelf: "center", marginBottom: 10 }]}>
+                            <Text style={{ color: "#fff" }}>Save</Text>
+                        </View>
+                    </TouchableOpacity>
                     {saveFlag === true &&
                         <View style={{ width: "80%", alignSelf: "center", paddingVertical: 10, backgroundColor: "#C9E2EA" }}>
                             <Text style={{ alignSelf: "center", color: "#00607C" }}>Edit Profile Success</Text>

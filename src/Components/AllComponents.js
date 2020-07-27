@@ -160,15 +160,15 @@ export const LoginForm = () => {
     if (isPageLogin === true) {
       if (emailFlag === true && passwordFlag === true) {
         try {
-          const data = await axios.post("http://192.168.1.6:5000/loginuser", {
+          const data = await axios.post("http://192.168.1.2:5000/loginuser", {
             email: emailValue,
             password: passwordValue,
             role: role
           });
           console.log(data);
           console.log(data.data.data.name);
-          
-          
+
+
 
           if (data.status === 200) {
             console.log("masuk");
@@ -219,17 +219,21 @@ export const LoginForm = () => {
         }
 
         try {
-          let data = await fetch("http://192.168.1.6:5000/signupuser", {
+          let data = await fetch("http://192.168.1.2:5000/signupuser", {
             method: 'POST',
             body: formData,
             headers: {
               'content-type': 'multipart/form-data',
             },
           });
+          console.log("Post Sukses");
+
           if (data.status) {
             setIsPageLogin(true);
           }
         } catch (error) {
+          console.log("error");
+
           console.log(error);
         }
       } else {
@@ -400,27 +404,31 @@ export const LoginForm = () => {
           }
 
           {isPageLogin === true ? (
-            <View onTouchStart={() => handlerSubmit()} style={stylesForm.buttonLogin}>
-              <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign In</Text>
-            </View>
-          ) : (
-              <View onTouchStart={() => handlerSubmit()} style={stylesForm.buttonLogin}>
-                <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign Up</Text>
+            <TouchableOpacity onPress={() => handlerSubmit()}>
+              <View style={stylesForm.buttonLogin}>
+                <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign In</Text>
               </View>
+            </TouchableOpacity>
+          ) : (
+              <TouchableOpacity onPress={() => handlerSubmit()}>
+                <View style={stylesForm.buttonLogin}>
+                  <Text style={{ fontSize: 20, color: "#FFFFFF" }}>Sign Up</Text>
+                </View>
+              </TouchableOpacity>
             )}
           {isPageLogin === true ? (
             <View style={{ flexDirection: "row", marginTop: 10, marginBottom: 50 }}>
               <Text style={{ color: "#FFFFFF" }}>Don't have Account ?</Text>
-              <View onTouchStart={() => handlerChangePage()}>
+              <TouchableOpacity onPress={() => handlerChangePage()}>
                 <Text style={{ color: "#00607C" }}> Register</Text>
-              </View>
+              </TouchableOpacity>
             </View>
           ) : (
               <View style={{ flexDirection: "row", marginTop: 10, marginBottom: 50 }}>
                 <Text style={{ color: "#FFFFFF" }}>Already have Account ?</Text>
-                <View onTouchStart={() => handlerChangePage()}>
+                <TouchableOpacity onPress={() => handlerChangePage()}>
                   <Text style={{ color: "#00607C" }}> Login</Text>
-                </View>
+                </TouchableOpacity>
               </View>
             )}
         </View>

@@ -1,8 +1,25 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, Linking, TouchableOpacity } from 'react-native';
 import HeaderComponent from '../Components/Header';
+import { deleteData, deleteToken } from '../Components/DeviceStorage';
+import { useNavigation } from 'react-navigation-hooks';
 
 export default function Setting(props) {
+    const { navigate } = useNavigation();
+
+    const handleLogout = async () => {
+        await deleteToken();
+        await deleteData();
+        navigate('Auth');
+    }
+
+    const handleFeedback = () => {
+        Linking.openURL(`mailto: admin@travelapp.co.id?body=Hi Admin,`);
+    }
+    const handleCallCenter = () => {
+        Linking.openURL(`tel:0215544262`)
+    }
+
     return (
         <View style={{ flex: 1, backgroundColor: "#fff" }}>
             <View style={{ flexDirection: "row", width: '100%' }}>
@@ -13,15 +30,21 @@ export default function Setting(props) {
             <HeaderComponent title={"Settings"} />
             <View style={styles.container}>
                 <View style={styles.subContainer}>
-                    <View onTouchStart={() => {}} style={styles.buttonContainer}>
-                        <Text style={styles.fontTitle}>Location</Text>
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <Text style={styles.fontTitle}>Feedback</Text>
-                    </View>
-                    <View style={styles.buttonContainer}>
-                        <Text style={styles.fontTitle}>Call Center</Text>
-                    </View>
+                    <TouchableOpacity onPress={() => handleFeedback()}>
+                        <View style={styles.buttonContainer}>
+                            <Text style={styles.fontTitle}>Feedback</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleCallCenter()}>
+                        <View style={styles.buttonContainer}>
+                            <Text style={styles.fontTitle}>Call Center</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleLogout()}>
+                        <View style={styles.buttonContainer}>
+                            <Text style={styles.fontTitle}>Logout</Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </View>
         </View>
@@ -39,15 +62,15 @@ const styles = StyleSheet.create({
         // backgroundColor: "black"
     },
     buttonContainer: {
-        justifyContent:"center",
-        height:50,
-        width:"100%",
-        borderBottomWidth:1,
-        borderColor:"black",
-        marginBottom:10
+        justifyContent: "center",
+        height: 50,
+        width: "100%",
+        borderBottomWidth: 1,
+        borderColor: "black",
+        marginBottom: 10
     },
     fontTitle: {
         fontSize: 22,
-        marginLeft:10
+        marginLeft: 10
     }
 })
