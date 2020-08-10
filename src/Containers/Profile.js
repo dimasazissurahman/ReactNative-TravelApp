@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Image, TextInput, ScrollView, ToastAndroid, TouchableOpacity } from 'react-native';
 import Menu, { SpaceHeader } from '../Components/Menu';
 import HeaderComponent from '../Components/Header';
@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from "expo-permissions";
 import { getData, deleteData, saveData } from '../Components/DeviceStorage';
 import Axios from "axios";
+import { AppContext } from '../Components/Provider';
 
 
 function Profile(props) {
@@ -23,6 +24,7 @@ function Profile(props) {
     const [userData, setUserData] = useState();
     const [userId, setUserId] = useState();
     const [saveFlag, setSaveFlag] = useState(false);
+    const { isLoading, setIsLoading } = useContext(AppContext);
 
     const handlerEmail = text => {
         let emailReg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -45,20 +47,24 @@ function Profile(props) {
 
         setUserData(data);
         if (data) {
-            let img_profile = `http://192.168.1.2:5000/${data.img_profile}`;
+            let img_profile = `http://192.168.1.62:5000/${data.img_profile}`;
             setFNameValue(data.name);
             setEmailValue(data.email);
             setPhoneValue(data.phone_number);
             setDescValue(data.description);
             setPhotoProfile(img_profile);
             setUserId(data.id);
+            setIsLoading(true);
             // setRole()
         }
     }
     useEffect(() => {
-        setSaveFlag(false);
         Fetch();
-    }, []);
+    }, [isLoading]);
+
+    setTimeout(() => {
+        setSaveFlag(false);
+    }, 3000);
 
 
     const pickImage = async () => {
@@ -106,7 +112,7 @@ function Profile(props) {
         formData.append('img_profile', { uri: localUri, name: filename, type });
 
         try {
-            let data = await Axios.post("http://192.168.1.2:5000/profile", formData);
+            let data = await Axios.post("http://192.168.1.62:5000/profile", formData);
             console.log(data);
 
 
@@ -114,7 +120,7 @@ function Profile(props) {
                 await deleteData();
                 console.log(data.data[0]);
                 saveData(data.data[0]);
-                Fetch();
+                setIsLoading(false);
                 setSaveFlag(true);
                 // ToastAndroid.show('Success Update', ToastAndroid.SHORT);
             }

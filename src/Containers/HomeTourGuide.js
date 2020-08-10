@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Image, StyleSheet, BackHandler, ToastAndroid, TouchableOpacity } from 'react-native';
 import Menu from '../Components/Menu';
 import * as Location from "expo-location";
@@ -8,6 +8,7 @@ import photoProfile from '../../assets/IMG_0223.png';
 import { getData } from '../Components/DeviceStorage';
 import Axios from 'axios';
 import { stylesForm } from '../Components/AllComponents';
+import { AppContext } from '../Components/Provider';
 
 export default function HomeTourGuide(props) {
     const [flagActive, setFlagActive] = useState(false);
@@ -18,6 +19,7 @@ export default function HomeTourGuide(props) {
     const [email, setEmail] = useState("");
     const [descValue, setDescValue] = useState("");
     const [photoProfile, setPhotoProfile] = useState();
+    const { isLoading, setIsLoading } = useContext(AppContext);
 
     const getLocationAsync = async () => {
         let status = await Permissions.askAsync(Permissions.LOCATION);
@@ -40,12 +42,13 @@ export default function HomeTourGuide(props) {
     const getUserData = async () => {
         const data = await getData();
 
-        let img_profile = `http://192.168.1.2:5000/${data.img_profile}`;
+        let img_profile = `http://192.168.1.62:5000/${data.img_profile}`;
         setData(data);
         setName(data.name);
         setEmail(data.email);
         setDescValue(data.description);
         setPhotoProfile(img_profile);
+        setIsLoading(true);
     }
 
 
@@ -54,7 +57,7 @@ export default function HomeTourGuide(props) {
         if (data) {
             (async () => {
                 try {
-                    const data = await Axios.post("http://192.168.1.2:5000/location", {
+                    const data = await Axios.post("http://192.168.1.62:5000/location", {
                         long: "106.6465428",
                         lat: "-6.1760408",
                         email: email
@@ -69,15 +72,18 @@ export default function HomeTourGuide(props) {
 
     useEffect(() => {
         getUserData();
+
+        console.log("HOME TOUR GUIDE");
+        
         const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
 
         return () => {
             backHandler.remove();
         }
-    }, []);
+    }, [isLoading]);
+    
 
     const handleBackPress = () => {
-        // console.log("jalan handle");
         ToastAndroid.show('If you want to go back, click menu', ToastAndroid.SHORT);
         return true;
     }

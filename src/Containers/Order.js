@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Image, Linking, ScrollView, TouchableOpacity } from 'react-native';
 import styled from 'styled-components';
 import Menu, { SpaceHeader, styles, FontSize } from '../Components/Menu';
@@ -6,10 +6,12 @@ import { LoginForm, stylesForm } from '../Components/AllComponents';
 import HeaderComponent from '../Components/Header';
 import Axios from "axios";
 import { getData } from '../Components/DeviceStorage';
+import { AppContext } from '../Components/Provider';
 
 export default function Order(props) {
     const [touristId, setTouristId] = useState();
     const [dataTourGuide, setDataTourGuide] = useState();
+    const { isLoading, setIsLoading } = useContext(AppContext);
 
     const handleCall = (data) => {
         console.log(data);
@@ -25,13 +27,14 @@ export default function Order(props) {
     const getDataTourist = async () => {
         const data = await getData();
         setTouristId(data.id);
+        setIsLoading(true);
     }
 
     const getDataHistory = async () => {
         getDataTourist();
         if (touristId) {
             try {
-                let data = await Axios.post("http://192.168.1.2:5000/history", {
+                let data = await Axios.post("http://192.168.1.62:5000/history", {
                     touristId: touristId
                 });
                 // console.log(data);
@@ -44,7 +47,7 @@ export default function Order(props) {
 
     useEffect(() => {
         getDataHistory();
-    }, [touristId]);
+    }, [touristId,isLoading]);
 
     console.log(dataTourGuide);
 
@@ -58,7 +61,7 @@ export default function Order(props) {
             <HeaderComponent title={"History"} />
             <ScrollView style={{ width: "100%" }}>
                 {dataTourGuide ? dataTourGuide.map((data, index) => {
-                    let img_profile = `http://192.168.1.2:5000/${data.img_profile}`;
+                    let img_profile = `http://192.168.1.62/${data.img_profile}`;
                     return (
                         <View style={styles.cardUser} key={index}>
                             <View style={{

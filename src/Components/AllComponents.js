@@ -160,7 +160,7 @@ export const LoginForm = () => {
     if (isPageLogin === true) {
       if (emailFlag === true && passwordFlag === true) {
         try {
-          const data = await axios.post("http://192.168.1.2:5000/loginuser", {
+          const data = await axios.post("http://192.168.1.62:5000/loginuser", {
             email: emailValue,
             password: passwordValue,
             role: role
@@ -219,7 +219,7 @@ export const LoginForm = () => {
         }
 
         try {
-          let data = await fetch("http://192.168.1.2:5000/signupuser", {
+          let data = await fetch("http://192.168.1.62:5000/signupuser", {
             method: 'POST',
             body: formData,
             headers: {
@@ -230,6 +230,7 @@ export const LoginForm = () => {
 
           if (data.status) {
             setIsPageLogin(true);
+            setPasswordValue("");
           }
         } catch (error) {
           console.log("error");

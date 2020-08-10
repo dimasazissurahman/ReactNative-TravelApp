@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, AsyncStorage, TouchableOpacity } from 'react-native';
 import { DrawerNavigatorItems } from 'react-navigation-drawer';
 import { deleteToken, deleteEmail, deleteData, getData } from './DeviceStorage';
 import { useNavigation } from 'react-navigation-hooks';
 import { stylesForm } from './AllComponents';
+import { AppContext } from './Provider';
 
 
 export const SideBar = props => {
     const { navigate } = useNavigation();
     const [name, setName] = useState();
     const [img_profile, setImg_profile] = useState();
+    const { isLoading, setIsLoading } = useContext(AppContext);
     const handleLogout = async () => {
         await deleteToken();
         await deleteData();
@@ -18,15 +20,15 @@ export const SideBar = props => {
     const Fetch = async () => {
         const data = await getData();
         console.log(data.name);
-        let img = `http://192.168.1.9:5000/${data.img_profile}`;
+        let img = `http://192.168.1.62:5000/${data.img_profile}`;
         // let img = "https://raw.githubusercontent.com/AboutReact/sampleresource/master/gift.png";
         setName(data.name);
         setImg_profile(img);
-
+        setIsLoading(true);
     }
     useEffect(() => {
         Fetch();
-    }, []);
+    }, [isLoading]);
 
     return (
         <ScrollView>

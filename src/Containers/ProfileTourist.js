@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, Image, TextInput, ScrollView, AsyncStorage, Alert, ToastAndroid, TouchableOpacity } from 'react-native';
 import Menu, { SpaceHeader } from '../Components/Menu';
 import HeaderComponent from '../Components/Header';
@@ -9,6 +9,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from "expo-permissions";
 import { getData, deleteData, saveData } from '../Components/DeviceStorage';
 import Axios from "axios";
+import { AppContext } from '../Components/Provider';
 
 
 function ProfileTourist(props) {
@@ -22,6 +23,8 @@ function ProfileTourist(props) {
     const [saveFlag, setSaveFlag] = useState(false);
     const [role, setRole] = useState();
     const [userId, setUserId] = useState();
+    const { isLoading, setIsLoading } = useContext(AppContext);
+    
 
 
     const handlerEmail = text => {
@@ -43,10 +46,11 @@ function ProfileTourist(props) {
     const Fetch = async () => {
         const data = await getData();
         console.log(data);
+        setIsLoading(true);
 
         // setUserData(data);
         if (data) {
-            let img_profile = `http://192.168.1.2:5000/${data.img_profile}`;
+            let img_profile = `http://192.168.1.62:5000/${data.img_profile}`;
             setFNameValue(data.name);
             setEmailValue(data.email);
             setPhoneValue(data.phone_number);
@@ -54,12 +58,16 @@ function ProfileTourist(props) {
             setPhotoProfile(img_profile);
             setUserId(data.id);
             setRole(data.role);
+            // setIsLoading(true);
         }
     }
     useEffect(() => {
-        setSaveFlag(false);
         Fetch();
-    }, []);
+    }, [isLoading]);
+
+    setTimeout(() => {
+        setSaveFlag(false);
+    }, 3000);
 
     const pickImage = async () => {
         getPermissionAccess();
@@ -106,7 +114,7 @@ function ProfileTourist(props) {
 
 
         try {
-            let data = await Axios.post("http://192.168.1.2:5000/profile", formData);
+            let data = await Axios.post("http://192.168.1.62:5000/profile", formData);
             console.log(data);
 
 
@@ -116,7 +124,7 @@ function ProfileTourist(props) {
                 saveData(data.data[0]);
                 Fetch();
                 setSaveFlag(true);
-                ToastAndroid.show('Success Update', ToastAndroid.SHORT);
+                setIsLoading(false);
             }
         } catch (error) {
             console.log("error");
