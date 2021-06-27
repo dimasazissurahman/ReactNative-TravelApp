@@ -78,6 +78,8 @@ export const LoginForm = () => {
   const [nameValue, setNameValue] = useState("");
   const [ktpNumber, setKtpNumber] = useState();
   const [region, setRegion] = useState();
+  const [language, setLanguage] = useState();
+  const [capability, setCapability] = useState();
 
   const [isPageLogin, setIsPageLogin] = useState(true);
   const [role, setRole] = useState("Tourist");
@@ -160,7 +162,7 @@ export const LoginForm = () => {
     if (isPageLogin === true) {
       if (emailFlag === true && passwordFlag === true) {
         try {
-          const data = await axios.post("http://192.168.1.62:5000/loginuser", {
+          const data = await axios.post("http://192.168.0.5:5000/loginuser", {
             email: emailValue,
             password: passwordValue,
             role: role
@@ -219,7 +221,7 @@ export const LoginForm = () => {
         }
 
         try {
-          let data = await fetch("http://192.168.1.62:5000/signupuser", {
+          let data = await fetch("http://192.168.0.5:5000/signupuser", {
             method: 'POST',
             body: formData,
             headers: {
@@ -283,6 +285,8 @@ export const LoginForm = () => {
       setRegion("");
       setKtpNumber("");
       setImageKtp();
+      setLanguage("");
+      setCapability("");
       setIsPageLogin(false);
     } else if (isPageLogin === false) {
       setEmailValue("");
@@ -292,6 +296,8 @@ export const LoginForm = () => {
       setPhoneNumberValue("");
       setRegion("");
       setKtpNumber("");
+      setLanguage("");
+      setCapability("");
       setImageKtp();
       setIsPageLogin(true);
     }
@@ -397,8 +403,19 @@ export const LoginForm = () => {
                 onChangeText={text => setKtpNumber(text)}
                 value={ktpNumber}
               />
+              <TextInput
+                style={stylesForm.textField}
+                keyboardType={"number-pad"}
+                placeholder={"KTP Number"}
+                placeholderTextColor={"#FFFFFF"}
+                onChangeText={text => setLanguage(text)}
+                value={language}
+              />
               <View style={stylesForm.textField} onTouchStart={() => pickImage()}>
                 <Text style={{ color: "#FFFFFF", marginTop: 10 }}>Upload KTP Photo</Text>
+              </View>
+              <View style={stylesForm.textField} onTouchStart={() => pickImage()}>
+                <Text style={{ color: "#FFFFFF", marginTop: 10 }}>Upload Sertifikasi</Text>
               </View>
               {imageKtp && <Image source={{ uri: imageKtp.uri }} style={{ width: 250, height: 150 }} />}
             </View>

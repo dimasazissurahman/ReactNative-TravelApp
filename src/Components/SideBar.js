@@ -20,7 +20,7 @@ export const SideBar = props => {
     const Fetch = async () => {
         const data = await getData();
         console.log(data.name);
-        let img = `http://192.168.1.62:5000/${data.img_profile}`;
+        let img = `http://192.168.0.5:5000/${data.img_profile}`;
         // let img = "https://raw.githubusercontent.com/AboutReact/sampleresource/master/gift.png";
         setName(data.name);
         setImg_profile(img);

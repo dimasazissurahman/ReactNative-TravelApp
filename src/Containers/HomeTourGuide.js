@@ -42,7 +42,7 @@ export default function HomeTourGuide(props) {
     const getUserData = async () => {
         const data = await getData();
 
-        let img_profile = `http://192.168.1.62:5000/${data.img_profile}`;
+        let img_profile = `http://192.168.0.5:5000/${data.img_profile}`;
         setData(data);
         setName(data.name);
         setEmail(data.email);
@@ -57,7 +57,7 @@ export default function HomeTourGuide(props) {
         if (data) {
             (async () => {
                 try {
-                    const data = await Axios.post("http://192.168.1.62:5000/location", {
+                    const data = await Axios.post("http://192.168.0.5:5000/location", {
                         long: "106.6465428",
                         lat: "-6.1760408",
                         email: email

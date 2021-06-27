@@ -47,7 +47,7 @@ function Profile(props) {
 
         setUserData(data);
         if (data) {
-            let img_profile = `http://192.168.1.62:5000/${data.img_profile}`;
+            let img_profile = `http://192.168.0.5:5000/${data.img_profile}`;
             setFNameValue(data.name);
             setEmailValue(data.email);
             setPhoneValue(data.phone_number);
@@ -112,7 +112,7 @@ function Profile(props) {
         formData.append('img_profile', { uri: localUri, name: filename, type });
 
         try {
-            let data = await Axios.post("http://192.168.1.62:5000/profile", formData);
+            let data = await Axios.post("http://192.168.0.5:5000/profile", formData);
             console.log(data);
 
 

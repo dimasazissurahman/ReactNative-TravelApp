@@ -46,7 +46,7 @@ function Maps() {
 
   const getDataMarker = async () => {
     try {
-      let data = await Axios.post("http://192.168.1.62:5000/maps", {
+      let data = await Axios.post("http://192.168.0.5:5000/maps", {
         long: textLongitude,
         lat: textLatitude
       });
@@ -110,7 +110,7 @@ function Maps() {
     setSelectMarker(true);
     for (let i = 0; i < dataMarker.length; i++) {
       if (i === index) {
-        let temp_img = `http://192.168.1.62:5000/${dataMarker[i].img_profile}`;
+        let temp_img = `http://192.168.0.5:5000/${dataMarker[i].img_profile}`;
         setName(dataMarker[i].name);
         setRegionName(dataMarker[i].region);
         setTourGuideId(dataMarker[i].id);
@@ -122,7 +122,7 @@ function Maps() {
 
   const handleSaveTourGuide = async () => {
     try {
-      let data = await Axios.post("http://192.168.1.62:5000/pick", {
+      let data = await Axios.post("http://192.168.0.5:5000/pick", {
         tourGuideId: tourGuideId,
         touristId: touristId
       });

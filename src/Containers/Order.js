@@ -34,7 +34,7 @@ export default function Order(props) {
         getDataTourist();
         if (touristId) {
             try {
-                let data = await Axios.post("http://192.168.1.62:5000/history", {
+                let data = await Axios.post("http://192.168.0.5:5000/history", {
                     touristId: touristId
                 });
                 // console.log(data);
@@ -61,7 +61,7 @@ export default function Order(props) {
             <HeaderComponent title={"History"} />
             <ScrollView style={{ width: "100%" }}>
                 {dataTourGuide ? dataTourGuide.map((data, index) => {
-                    let img_profile = `http://192.168.1.62/${data.img_profile}`;
+                    let img_profile = `http://192.168.0.5:5000/${data.img_profile}`;
                     return (
                         <View style={styles.cardUser} key={index}>
                             <View style={{
